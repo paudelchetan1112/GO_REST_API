@@ -1,0 +1,185 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
+)
+
+type user struct {
+	Name string `json:"name"`
+	Age  string `json:"age"`
+	City string `json:"city"`
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello Root route "))
+	fmt.Println("Hello Root Route")
+
+}
+func teacherHandler(w http.ResponseWriter, r *http.Request) {
+	//teachers/id
+	//teachers/?key=value&query=value2&sortby=email&sortorder=ASC
+
+
+	w.Write([]byte("Hello Teacher Route"))
+	fmt.Println("Hello Teacher Route")
+
+	switch r.Method {
+	case http.MethodGet:
+		fmt.Println(r.URL.Path)
+		path:=strings.TrimPrefix(r.URL.Path, "/teachers/")
+		userID:=strings.TrimSuffix(path, "/")
+		fmt.Println("The ID is", userID)
+
+fmt.Println(r.URL.Query())
+queryParams:=r.URL.Query()
+sortby:=queryParams.Get("sortby")
+sortorder:=queryParams.Get("setorder")
+if sortorder==""{
+	sortorder="Desc"
+}
+fmt.Printf("SortOrder:%s, setOrder:=%s\n", sortby, sortorder)
+
+query:=make(map[string]interface{})
+for key, value:=range r.URL.Query(){
+	query[key]=value[0]
+}
+fmt.Println("Incoming Params are:", query)
+		w.Write([]byte("Hello Get method on Teacher Route"))
+		fmt.Println("Hello Get method on Teacher Route")
+
+	case http.MethodPost:
+
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Error parsing form", http.StatusBadRequest)
+			return
+		}
+		fmt.Println("Form:", r.Form)
+		//prepare response data
+		response := make(map[string]interface{})
+
+		for key, value := range r.Form {
+			response[key] = value
+		}
+
+		fmt.Println("processed Response:", response)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Println("Error while reading ")
+		}
+		defer r.Body.Close()
+		fmt.Println(string(body))
+
+		//if you expect json data:
+		var userInstance user
+
+		err = json.Unmarshal(body, &userInstance)
+		if err != nil {
+			return
+
+		}
+
+		fmt.Println("unmarshel json data into an instance of user struct", userInstance)
+
+		fmt.Println("name:", userInstance.Name, "Age:", userInstance.Age, "City:", userInstance.City)
+		response1 := make(map[string]interface{})
+		err = json.Unmarshal(body, &response1)
+
+		if err != nil {
+			return
+
+		}
+		fmt.Println("unmarshel json data into interface", response1)
+
+		w.Write([]byte("Hello post method on Teacher Route"))
+		fmt.Println("Hello post route on Teacher method")
+	case http.MethodDelete:
+		w.Write([]byte("Hello Delete  method on Teacher Route"))
+		fmt.Println("Hello Delete method on Teacher Route")
+	case http.MethodPut:
+		w.Write([]byte("Hello Put method on Teacher Route"))
+		fmt.Println("Hello put route on Teacher route")
+	case http.MethodPatch:
+		w.Write([]byte("Hello Patch Method on Teacher Route"))
+		fmt.Println("Hello patch Route in Teacher Route")
+	default:
+		w.Write([]byte("Invalid request method"))
+
+	}
+
+}
+func studentHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello student Route"))
+	fmt.Println("Hello student Route")
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello Get method on student Route"))
+		fmt.Println("Hello Get method on student Route")
+
+	case http.MethodPost:
+		w.Write([]byte("Hello Get method on student Route"))
+		fmt.Println("Hello Get route on student method")
+
+	case http.MethodDelete:
+		w.Write([]byte("Hello Delete  method on student Route"))
+		fmt.Println("Hello Delete method on student Route")
+	case http.MethodPut:
+		w.Write([]byte("Hello Put method on student Route"))
+		fmt.Println("Hello put route on student route")
+	case http.MethodPatch:
+		w.Write([]byte("Hello Patch Method on student Route"))
+		fmt.Println("Hello patch Route in student Route")
+	default:
+		w.Write([]byte("Invalid request method"))
+
+	}
+}
+func execsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello Execs Route"))
+	fmt.Println("Hello execs Route")
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello Get method on Execs Route"))
+		fmt.Println("Hello Get method on Execs Route")
+
+	case http.MethodPost:
+		w.Write([]byte("Hello Get method on Execs Route"))
+		fmt.Println("Hello Get route on Execs method")
+
+	case http.MethodDelete:
+		w.Write([]byte("Hello Delete  method on Execs Route"))
+		fmt.Println("Hello Delete method on Execs Route")
+	case http.MethodPut:
+		w.Write([]byte("Hello Put method on Execs Route"))
+		fmt.Println("Hello put route on Execs route")
+	case http.MethodPatch:
+		w.Write([]byte("Hello Patch Method on Execs Route"))
+		fmt.Println("Hello patch Route in Execs Route")
+	default:
+		w.Write([]byte("Invalid request method"))
+
+	}
+}
+func main() {
+	port := ":3000"
+
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/teachers/", teacherHandler)
+
+	http.HandleFunc("/students/", studentHandler)
+
+	http.HandleFunc("/execs/", execsHandler)
+	fmt.Println("Server is running on port:", port)
+
+	err := http.ListenAndServe(port, nil)
+	if err != nil {
+		log.Fatalln("Error starting the server")
+
+	}
+
+}

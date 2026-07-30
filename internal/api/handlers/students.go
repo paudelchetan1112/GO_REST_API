@@ -1,0 +1,27 @@
+package handlers
+
+import "net/http"
+
+func StudentHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello Get method on student Route"))
+
+	case http.MethodPost:
+		w.Write([]byte("Hello POST method on student Route"))
+
+	case http.MethodDelete:
+		w.Write([]byte("Hello Delete  method on student Route"))
+
+	case http.MethodPut:
+		w.Write([]byte("Hello Put method on student Route"))
+
+	case http.MethodPatch:
+		w.Write([]byte("Hello Patch Method on student Route"))
+
+	default:
+		w.Write([]byte("Invalid request method"))
+
+	}
+}
