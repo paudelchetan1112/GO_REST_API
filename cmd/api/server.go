@@ -18,25 +18,21 @@ import (
 	"restapi/internal/api/router"
 	sqlconnect "restapi/internal/repositories/sqlconnect"
 
-	// "restapi/internal/models"
-
-	"restapi/pkg/utils"
-
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	err:=godotenv.Load()
-	if err!=nil{
-	
+	err := godotenv.Load()
+	if err != nil {
+
 		return
 	}
-	_, err=sqlconnect.ConnectDb()
+	_, err = sqlconnect.ConnectDb()
 
-	if err!=nil{
+	if err != nil {
 		fmt.Println("Error while connecting db")
 		return
-	} 
+	}
 
 	port := ":3000"
 	cert := "certificate.crt"
@@ -57,8 +53,11 @@ func main() {
 	// secureMux:= mw.Cors(rl.Middleware(mw.ResponseTimeMiddleware(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOption)(mux))))))
 
 	// secureMux:=applyMiddlewares(mux, mw.Hpp(hppOption), mw.Compression, mw.SecurityHeaders, mw.ResponseTimeMiddleware, rl.Middleware, mw.Cors)
-	router := router.Router()
-	secureMux := utils.ApplyMiddlewares(router, mw.SecurityHeaders)
+	router := router.MainRouter()
+	jwtMiddleware := mw.MiddlewaresExcludePaths(mw.JWTMiddleware, "/execs/login")
+	// secureMux := utils.ApplyMiddlewares(router, mw.SecurityHeaders)
+
+	secureMux := jwtMiddleware(mw.SecurityHeaders(router))
 	//create custom server
 	server := &http.Server{
 		Addr:    port,

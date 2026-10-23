@@ -2,18 +2,16 @@ package router
 
 import (
 	"net/http"
-	"restapi/internal/api/handlers"
+	// "restapi/internal/api/handlers"
 )
 
-func Router() *http.ServeMux{
+func MainRouter() *http.ServeMux {
+	eRouter:=execsRouter()
+	tRouter:=teacherRouter()
+	sRouter:=studentRouter()
+	sRouter.Handle("/", eRouter)
+	tRouter.Handle("/", sRouter) 
+	return tRouter
 
-		mux := http.NewServeMux()
-
-	mux.HandleFunc("/", handlers.RootHandler)
-	mux.HandleFunc("/teachers/", handlers.TeacherHandler)
-
-	mux.HandleFunc("/students/", handlers.StudentHandler)
-
-	mux.HandleFunc("/execs/", handlers.ExecsHandler)
-	return mux
+	
 }
